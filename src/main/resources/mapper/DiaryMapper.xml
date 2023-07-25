@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.web.test.Diary.mapper.DiaryMapper">  
+	<select id="diaryList" resultType="com.web.test.Diary.vo.DiaryVo" parameterType="hashmap">
+	    SELECT DIARY_DATE, DIARY_CONTENT, DIARY_NO
+	    FROM TB_DIARY
+	    INNER JOIN TB_USER ON TB_DIARY.USER_NO = TB_USER.USER_NO
+	    WHERE TB_USER.USER_ID = #{user_id}
+	    ORDER BY DIARY_NO DESC
+	</select>
+	
+	<select id="miniList" resultType="com.web.test.Mini.vo.MiniVo" parameterType="hashmap">
+		SELECT M.MINI_NO,M.MINI_TODAY, M.MINI_TOTAL,M.MINI_TITLE, M.MINI_PROFILE, M.MINI_CONTENT,
+				M.USER_NO, U.USER_ID
+		FROM TB_MINI M
+		JOIN TB_USER U ON M.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}	
+		ORDER BY M.MINI_NO DESC
+		LIMIT 1	
+	</select> 
+	
+	<insert id="insertDiary" parameterType="com.web.test.Diary.vo.DiaryVo">
+	    INSERT INTO TB_DIARY (DIARY_DATE, DIARY_CONTENT, USER_NO)
+	    VALUES (#{diary_date}, #{diary_content}, 
+	        (SELECT USER_NO FROM TB_USER WHERE USER_ID = #{user_id} LIMIT 1)
+	    )
+	</insert>
+	
+	<update id="updateDiary" parameterType="com.web.test.Diary.vo.DiaryVo">
+		UPDATE TB_DIARY SET DIARY_CONTENT = #{diary_content}
+		WHERE diary_no = #{diary_no}
+	</update>
+	
+	<delete id="deleteDiary" parameterType="com.web.test.Diary.vo.DiaryVo">
+	    DELETE FROM TB_DIARY WHERE DIARY_NO = #{diary_no}
+	</delete>
+</mapper>

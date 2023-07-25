@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.web.test.Notice.mapper.NoticeMapper">   
+    
+    <!-- 페이징처리 및 목록보기 -->
+   	<select id="noticeList" resultType="com.web.test.Notice.vo.NoticeVo" parameterType="hashmap">  		
+   			SELECT N.* FROM (
+				SELECT NOTICE_NO, TITLE, WRITER, REG_DATE, VIEW_COUNT,
+				(@rownum := @rownum + 1) AS RNUM
+				FROM TB_NOTICE, (SELECT @rownum := 0) AS R
+				ORDER BY NOTICE_NO DESC
+			) AS N
+			WHERE N.RNUM BETWEEN #{pageStart} + 1 AND #{pageStart} + #{perPageNum}	
+   	</select>
+   	<select id ="noticeListCnt" resultType="int">
+   		SELECT COUNT(*)
+   		FROM TB_NOTICE
+   	</select>
+   	
+   	<!-- 조회수 증가 -->
+   	<update id="updateView" parameterType="Long">
+   		UPDATE TB_NOTICE
+   		SET VIEW_COUNT = VIEW_COUNT + 1
+   		WHERE NOTICE_NO = #{notice_no}
+   	</update>
+   	
+   	
+   	<!-- 검색하기 -->
+	<select id="searchNotices" resultType="com.web.test.Notice.vo.NoticeVo">
+	    SELECT *
+	    FROM (
+	        SELECT NOTICE_NO, TITLE, WRITER, REG_DATE, VIEW_COUNT,
+	            (@rownum := @rownum + 1) AS RNUM
+	        FROM TB_NOTICE, (SELECT @rownum := 0) AS R
+	        <where>
+	                <if test="searchCondition == 'title'">
+	                    TITLE LIKE CONCAT('%', #{searchKeyword}, '%')
+	                </if>
+	                <if test="searchCondition == 'writer'">
+	                    WRITER LIKE CONCAT('%', #{searchKeyword}, '%')
+	                </if>
+	                </where>
+	        ORDER BY NOTICE_NO DESC
+	    ) T
+	    WHERE RNUM BETWEEN #{cri.pageStart} + 1 AND #{cri.pageStart} + #{cri.perPageNum}
+	</select>	
+	
+	<select id="searchList" resultType="int">
+		SELECT COUNT(*) AS cnt
+		FROM TB_NOTICE
+		<where>
+			<if test="searchCondition == 'title'">
+			    AND TITLE LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+			<if test="searchCondition == 'writer'">
+			    AND WRITER LIKE CONCAT('%', #{searchKeyword}, '%')
+			</if>
+			<if test="searchKeyword != null">
+				AND (
+		        (UPPER(#{searchCondition}) = 'TITLE' AND TITLE LIKE CONCAT ('%', #{searchKeyword} , '%'))
+		        OR (UPPER(#{searchCondition}) = 'WRITER' AND WRITER LIKE CONCAT('%' , #{searchKeyword} , '%'))
+		      )
+			</if>
+			</where>
+	</select>
+	
+	
+	 <!-- 게시글 상세 조회 -->
+    <select id="selectNotice" resultType="com.web.test.Notice.vo.NoticeVo">
+        SELECT notice_no, title, content, writer, reg_date , view_count 
+        FROM tb_notice
+        WHERE notice_no = #{notice_no}
+    </select>
+    
+    <!-- 게시글 등록 -->
+    <insert id="insertNotice" parameterType="com.web.test.Notice.vo.NoticeVo">        
+        INSERT INTO tb_notice (title, content, writer, reg_date)
+        VALUES (#{title}, #{content}, #{writer}, #{reg_date})
+    </insert>
+
+    <!-- 게시글 수정 -->
+    <update id="updateNotice" parameterType="com.web.test.Notice.vo.NoticeVo">
+        UPDATE tb_notice SET title = #{title}, content = #{content}, update_date = now()
+        WHERE notice_no = #{notice_no}
+    </update>
+    
+    <!-- 게시글 삭제 -->
+    <delete id="deleteNotice" parameterType="java.lang.Long">
+        DELETE FROM tb_notice WHERE notice_no = #{notice_no}
+    </delete>
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.web.test.Visit.mapper.VisitMapper">  
+	<select id="visitList" resultType="com.web.test.Visit.vo.VisitVo" parameterType="hashmap">
+		SELECT V.REGISTER_NO, V.REGISTER_TITLE, V.REGISTER_DATE, V.REGISTER_CONTENT, V.REGISTER_WRITER, U.USER_NAME
+		FROM TB_VISIT V
+		INNER JOIN TB_USER U ON V.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}
+		ORDER BY V.REGISTER_NO DESC
+	</select>
+	
+	<select id="miniList" resultType="com.web.test.Mini.vo.MiniVo" parameterType="hashmap">
+		SELECT M.MINI_NO,M.MINI_TODAY, M.MINI_TOTAL,M.MINI_TITLE, M.MINI_PROFILE, M.MINI_CONTENT,
+				M.USER_NO, U.USER_ID
+		FROM TB_MINI M
+		JOIN TB_USER U ON M.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}	
+		ORDER BY M.MINI_NO DESC
+		LIMIT 1	
+	</select> 
+	
+	<insert id="insertVisit" parameterType="com.web.test.Visit.vo.VisitVo">
+	    INSERT INTO TB_VISIT (register_title, register_date,register_content,register_writer,user_no)
+	    VALUES (#{register_title}, NOW(), #{register_content}, #{register_writer},
+	        (SELECT USER_NO FROM TB_USER WHERE USER_ID = #{user_id} LIMIT 1)
+	    )
+	</insert>
+	
+	<update id="updateVisit" parameterType="com.web.test.Visit.vo.VisitVo">
+		UPDATE TB_VISIT SET REGISTER_TITLE = #{register_title}, REGISTER_CONTENT = #{register_content}
+		WHERE REGISTER_NO = #{register_no}
+	</update>
+	
+	<delete id="deleteVisit" parameterType="com.web.test.Visit.vo.VisitVo">
+	    DELETE FROM TB_VISIT WHERE REGISTER_NO = #{register_no}
+	</delete>
+</mapper>

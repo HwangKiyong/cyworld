@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" > 
+<mapper namespace="com.web.test.Photo.mapper.PhotoMapper">
+	<select id="photoList" resultType="com.web.test.Photo.vo.PhotoVo" parameterType="hashmap">
+		SELECT P.PHOTO_NAME, P.PHOTO_DATE, P.PHOTO_PATH, P.PHOTO_TEXT, P.PHOTO_NO
+		FROM TB_PHOTO P
+		INNER JOIN TB_USER U ON P.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}
+		ORDER BY P.PHOTO_NO DESC
+	</select>  
+	
+	<select id="miniList" resultType="com.web.test.Mini.vo.MiniVo" parameterType="hashmap">
+		SELECT M.MINI_NO,M.MINI_TODAY, M.MINI_TOTAL,M.MINI_TITLE, M.MINI_PROFILE, M.MINI_CONTENT,
+				M.USER_NO, U.USER_ID
+		FROM TB_MINI M
+		JOIN TB_USER U ON M.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}	
+		ORDER BY M.MINI_NO DESC
+		LIMIT 1	
+	</select> 
+	
+	<insert id="insertPhoto" parameterType="com.web.test.Photo.vo.PhotoVo">
+		INSERT INTO TB_PHOTO (PHOTO_NAME, PHOTO_DATE, PHOTO_PATH, PHOTO_TEXT, USER_NO)
+		VALUES (#{photo_name}, NOW(), #{photo_path}, #{photo_text},
+			(SELECT USER_NO FROM TB_USER WHERE USER_ID = #{user_id} LIMIT 1)
+			)
+	</insert>
+	
+	<update id="updatePhoto" parameterType="com.web.test.Photo.vo.PhotoVo">
+		UPDATE TB_PHOTO SET PHOTO_NAME = #{photo_name}, PHOTO_TEXT = #{photo_text}
+		WHERE photo_no = #{photo_no}
+	</update>
+	
+	<delete id="deletePhoto" parameterType="com.web.test.Photo.vo.PhotoVo">
+	    DELETE FROM TB_PHOTO WHERE PHOTO_NO = #{photo_no}
+	</delete>
+</mapper>

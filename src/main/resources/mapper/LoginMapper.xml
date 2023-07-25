@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" > <!-- mybatis를 사용하기때문에 이분도 필요하다. -->
+<mapper namespace="com.web.test.User.mapper.UserMapper">
+	<select id="loginCheck" resultType="com.web.test.User.vo.UserVo">
+		SELECT * FROM
+		TB_USER
+		WHERE USER_ID = #{user_id}
+		AND USER_PWD = #{user_pwd}
+	</select>
+	
+	<select id="todayList" resultType="com.web.test.Mini.vo.MiniVo">
+		SELECT U.USER_ID, M.MINI_TODAY
+		FROM TB_MINI M JOIN TB_USER U ON M.USER_NO = U.USER_NO
+		WHERE DATE(M.MINI_DATE) = CURDATE()		
+		ORDER BY MINI_TODAY DESC
+		LIMIT 5
+	</select>
+</mapper>

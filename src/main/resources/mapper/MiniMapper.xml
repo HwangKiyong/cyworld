@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" > <!-- mybatis를 사용하기때문에 이분도 필요하다. -->
+<mapper namespace="com.web.test.Mini.mapper.MiniMapper">
+	<select id="miniList" resultType="com.web.test.Mini.vo.MiniVo" parameterType="hashmap">
+		SELECT M.MINI_NO,M.MINI_TODAY, M.MINI_TOTAL, M.MINI_TITLE, M.MINI_PROFILE, M.MINI_CONTENT,M.MINI_ROOM,
+				M.USER_NO, U.USER_ID
+		FROM TB_MINI M
+		JOIN TB_USER U ON M.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}	
+		ORDER BY M.MINI_NO DESC
+		LIMIT 1	
+	</select>  
+	
+	<insert id="insertMini" parameterType="com.web.test.Mini.vo.MiniVo">
+		INSERT INTO TB_MINI (MINI_PROFILE, MINI_CONTENT, MINI_ROOM, MINI_TODAY, MINI_TOTAL,USER_NO)
+		VALUES ('cyworldimg.jpg', '환영합니다','miniroom.jpg', 0, 0,
+			(SELECT USER_NO FROM TB_USER WHERE USER_ID = #{user_id} LIMIT 1)
+			)
+	</insert>	
+	
+	<update id="updateMini" parameterType="com.web.test.Mini.vo.MiniVo">
+	  UPDATE TB_MINI
+	  SET MINI_PROFILE = #{mini_profile},
+	      MINI_CONTENT = #{mini_content},
+	      USER_NO = (SELECT USER_NO FROM TB_USER WHERE USER_ID = #{user_id} LIMIT 1)
+	  WHERE MINI_NO = #{mini_no}
+	</update>	
+	
+	<update id="updateRoom" parameterType="com.web.test.Mini.vo.MiniVo">
+	  UPDATE TB_MINI
+	  SET MINI_ROOM = #{mini_room},
+	      USER_NO = (SELECT USER_NO FROM TB_USER WHERE USER_ID = #{user_id} LIMIT 1)
+	  WHERE MINI_NO = #{mini_no}
+	</update>
+	
+	<select id="diaryTodayCnt" resultType="int">
+		SELECT COUNT(*) FROM TB_DIARY D
+		INNER JOIN TB_USER U ON D.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id} AND DATE(D.DIARY_DATE) = CURDATE()
+	</select>
+	<select id="diaryTotalCnt" resultType="int">
+		SELECT COUNT(*) FROM TB_DIARY D
+		INNER JOIN TB_USER U ON D.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}
+	</select>
+	
+	<select id="photoTodayCnt" resultType="int">
+		SELECT COUNT(*) FROM TB_PHOTO P
+		INNER JOIN TB_USER U ON P.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id} AND DATE(P.PHOTO_DATE) = CURDATE()
+	</select>
+	<select id="photoTotalCnt" resultType="int">
+		SELECT COUNT(*) FROM TB_PHOTO P
+		INNER JOIN TB_USER U ON P.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}
+	</select>
+	
+	<select id="visitTodayCnt" resultType="int">
+		SELECT COUNT(*) FROM TB_VISIT V
+		INNER JOIN TB_USER U ON V.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id} AND DATE(V.REGISTER_DATE) = CURDATE()
+	</select>
+	<select id="visitTotalCnt" resultType="int">
+		SELECT COUNT(*) FROM TB_VISIT V
+		INNER JOIN TB_USER U ON V.USER_NO = U.USER_NO
+		WHERE U.USER_ID = #{user_id}
+	</select>
+	<!-- 
+	<select id="updateNews" resultType="map" parameterType="hashmap">
+		SELECT p.photo_name, v.register_title
+		FROM tb_photo p, tb_visit v, tb_user u
+		WHERE u.user_no = p.user_no
+		AND v.user_no = u.user_no
+		AND u.user_id = #{user_id}
+	</select>
+	-->
+	
+	<select id="getPhotoname" resultType="com.web.test.Photo.vo.PhotoVo">
+		SELECT P.PHOTO_NAME 
+		FROM TB_PHOTO P, TB_USER U
+		WHERE P.USER_NO = U.USER_NO
+		AND U.USER_ID = #{user_id}
+		AND DATE(P.PHOTO_DATE) = CURDATE()
+		ORDER BY P.PHOTO_NO DESC	
+		LIMIT 3	
+	</select>
+	
+	<select id="getRegistertitle" resultType="com.web.test.Visit.vo.VisitVo">
+		SELECT V.REGISTER_TITLE
+		FROM TB_VISIT V, TB_USER U
+		WHERE V.USER_NO = U.USER_NO
+		AND U.USER_ID = #{user_id}
+		AND DATE(V.REGISTER_DATE) = CURDATE()
+		ORDER BY V.REGISTER_NO DESC
+		LIMIT 3
+	</select>
+	
+	<!-- 기본적으로 default로 되어있음 CALLABLE은 프로시저로 쓸거란 걸 선언하는 옵션이다. -->
+	<update id="updateTodayTotalByUserId" statementType="CALLABLE">
+        {CALL updateTodayTotalByUserId(#{user_id})}
+    </update>
+</mapper>
