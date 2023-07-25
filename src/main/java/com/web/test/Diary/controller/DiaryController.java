@@ -23,7 +23,7 @@ public class DiaryController {
 
 	@Autowired
 	private DiaryService diaryService;
-	
+	 
 	//다이어리 보여주는 화면
 	@RequestMapping("/diary/{user_no}")		
 	public String diary(@PathVariable("user_no")Integer user_no, Model model, HttpSession session) throws Exception {
